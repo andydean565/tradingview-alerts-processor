@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "clean": "rimraf dist",
-    "dev": "npm run clean && concurrently \"npm run lint\" \"npm run prettier:watch\" \"npm run test:watch\" \"nodemon src/server.ts\"",
+    "dev": "nodemon src/server.ts",
+    "dev-big": "npm run clean && concurrently \"npm run lint\" \"npm run prettier:watch\" \"npm run test:watch\" \"nodemon src/server.ts\"",
     "lint": "npm run clean && eslint . --ext .ts",
     "lint:fix": "npm run clean && eslint . --ext .ts --fix",
     "prettier:watch": "npm run clean && onchange ./src/**/*.ts -- prettier --write {{changed}}",
@@ -56,7 +57,7 @@
     ]
   },
   "dependencies": {
-    "ccxt": "1.69.28",
+    "ccxt": "^1.71.54",
     "class-transformer": "0.5.1",
     "class-transformer-validator": "0.9.1",
     "class-validator": "0.13.2",

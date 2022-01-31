@@ -121,7 +121,10 @@ export abstract class BaseExchangeService {
     if (!session) {
       try {
         const options = getExchangeOptions(this.exchangeId, account);
+
         const instance = new ccxt[this.exchangeId](options);
+        instance.setSandboxMode(account.sandbox ?? false);
+
         await this.checkCredentials(account, instance);
         this.sessions.set(accountId, { exchange: instance, account });
       } catch (err) {
@@ -183,12 +186,12 @@ export abstract class BaseExchangeService {
       const availableMarkets = markets.flatMap((m) =>
         m.active
           ? {
-              id: m.id,
-              symbol: m.symbol,
-              base: m.base,
-              quote: m.quote,
-              type: m.type
-            }
+            id: m.id,
+            symbol: m.symbol,
+            base: m.baseId,
+            quote: m.quoteId,
+            type: m.type
+          }
           : undefined
       );
       debug(MARKETS_READ_SUCCESS(this.exchangeId));
@@ -334,21 +337,21 @@ export abstract class BaseExchangeService {
         .exchange.createMarketOrder(symbol, side, size);
       side === Side.Buy
         ? long(
-            OPEN_LONG_TRADE_SUCCESS(
-              this.exchangeId,
-              accountId,
-              symbol,
-              cost.toFixed(2)
-            )
+          OPEN_LONG_TRADE_SUCCESS(
+            this.exchangeId,
+            accountId,
+            symbol,
+            cost.toFixed(2)
           )
+        )
         : short(
-            OPEN_SHORT_TRADE_SUCCESS(
-              this.exchangeId,
-              accountId,
-              symbol,
-              cost.toFixed(2)
-            )
-          );
+          OPEN_SHORT_TRADE_SUCCESS(
+            this.exchangeId,
+            accountId,
+            symbol,
+            cost.toFixed(2)
+          )
+        );
       return order;
     } catch (err) {
       error(OPEN_TRADE_ERROR(this.exchangeId, accountId, symbol), err);
@@ -364,6 +367,7 @@ export abstract class BaseExchangeService {
     ticker?: Ticker // can be preloaded in openOrder
   ): Promise<Order> => {
     await this.refreshSession(account);
+
     const { symbol } = trade;
     const accountId = getAccountId(account);
     try {
